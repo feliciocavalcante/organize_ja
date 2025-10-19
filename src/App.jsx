@@ -3,7 +3,7 @@ import logo1 from './assets/logo1.png';
 import Header from './components/header/Header';
 import About from './components/about/About';
 import Function from './components/function/Function';
-import Depoiment from './components/depoiment/depoiment';
+import Depoiment from './components/depoiment/Depoiment';
 import Plans from './components/plans/Plans';
 import Register from './components/register/Register';
 import Footer from './components/footer/Footer';
