@@ -6,5 +6,5 @@ export default function ButtonControl() {
             <a href="#cadastro"> Quero o Controle Agora! </a>  <Zap className="ml-3 h-6 w-6" />
         </button>
     );
-}   
+};
 
