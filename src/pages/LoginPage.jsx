@@ -72,10 +72,10 @@ const LoginPage = () => {
             <div className="w-full max-w-md bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-800">
                 
                 {/* ESPAÇO DA IMAGEM DA LOGO (mantido) */}
-                {LOGO_URL && (
+                {logoTop && (
                     <div className="flex justify-center mb-6">
                         <img 
-                            src={LOGO_URL} 
+                            src={logoTop} 
                             alt="Logo Organize Já" 
                             className="h-16 object-contain w-auto" 
                         />

@@ -251,7 +251,7 @@ const DashboardPage = () => {
                 <div className="container mx-auto flex justify-between items-center max-w-7xl">
                     <div className="flex items-center space-x-3">
                         <img
-                            src={LOGO_URL}
+                            src={logoTop}
                             alt="Organize Já Logo"
                             className="h-10 w-auto object-contain"
                         />
