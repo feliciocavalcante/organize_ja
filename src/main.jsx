@@ -23,7 +23,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         
         {/* Rota do Dashboard (PROTEGIDA, será implementada na Fase 4) */}
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/dashboard/*" element={<TransactionModal />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
