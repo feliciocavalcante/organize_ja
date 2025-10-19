@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient'; 
 
-const LOGO_URL = "src/assets/logo1.png";
+const LOGO_URL = "src/assets/logoTop.png";
 
 const LoginPage = () => {
     const [isLogin, setIsLogin] = useState(true);

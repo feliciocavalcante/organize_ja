@@ -7,7 +7,7 @@ import { LogOut, ArrowUp, ArrowDown, DollarSign } from 'lucide-react';
 import TransactionModal from '/src/pages/TransactionModal.jsx';
 
 // IMPORTAÇÃO DO LOGO
-import LOGO_URL from '/src/assets/logo1.png';
+import LOGO_URL from '../assets/logoTop.png';
 
 // --- Componentes Reutilizáveis ---
 
