@@ -31,13 +31,13 @@ function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
       <div
         onClick={() => setIsMobileMenuOpen(false)}
         className={`fixed inset-0 bg-black/50 md:hidden transition-opacity
-              ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'} z-5`} />
+              ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'} z-20`} />
 
       {/* 4. O Sidebar em si */}
       <nav className={`w-[250px] h-screen fixed left-0 top-0 
                       bg-white border-r border-gray-200 
                       p-6 flex flex-col shadow-md
-                      z-10 transition-transform duration-300 ease-in-out
+                      z-30 transition-transform duration-300 ease-in-out
                       ${mobileTransform} md:translate-x-0`} // 5. Classes mágicas!
       >
 
