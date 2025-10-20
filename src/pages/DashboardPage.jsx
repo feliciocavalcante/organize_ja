@@ -2,14 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { LogOut, ArrowUp, ArrowDown, DollarSign } from 'lucide-react';
+import logoTop from '../assets/logoTop.png';
 
-// IMPORTAÇÃO DO MODAL DE TRANSAÇÕES
 import TransactionModal from '/src/pages/TransactionModal.jsx';
 
-// IMPORTAÇÃO DO LOGO
-import LOGO_URL from '../assets/logoTop.png';
 
-// --- Componentes Reutilizáveis ---
 
 const MetricCard = ({ title, value, icon: Icon, color, isTotal = false, totalValue = 0 }) => {
 
