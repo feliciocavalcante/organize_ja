@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient'; 
 import logoTop from '../assets/logoTop.png';
-import logBlue from '../assets/logBlue.png';
+import logBluee from '../assets/logBluee.png';
 
 
 const LoginPage = () => {
@@ -75,7 +75,7 @@ const LoginPage = () => {
                 {logoTop && (
                     <div className="flex justify-center mb-6">
                         <img 
-                            src={logBlue} 
+                            src={logBluee} 
                             alt="Logo Organize Já" 
                             className="h-16 object-contain w-auto" 
                         />
