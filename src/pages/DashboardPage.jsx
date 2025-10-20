@@ -5,7 +5,7 @@ import { LogOut, ArrowUp, ArrowDown, DollarSign } from 'lucide-react';
 import logoTop from '../assets/logoTop.png';
 
 import TransactionModal from '/src/pages/TransactionModal.jsx';
-
+import CategoryPieChart from '../components/Charts/CategoryPieChart';
 
 
 const MetricCard = ({ title, value, icon: Icon, color, isTotal = false, totalValue = 0 }) => {
@@ -158,7 +158,7 @@ const DashboardPage = () => {
                 alert('Transação deletada com sucesso!');
 
                 // 4. Recarrega a lista de transações (AGORA FUNCIONA)
-                fetchTransactions(); 
+                fetchTransactions();
             }
         }
     };
@@ -272,17 +272,28 @@ const DashboardPage = () => {
                     <MetricCard title="Total" value={metrics.total} icon={DollarSign} isTotal={true} totalValue={metrics.total_num} />
                 </div>
 
-                {/* 2. TABELA DE TRANSAÇÕES */}
-                <div className="mt-8">
-                    <h2 className="text-2xl font-bold text-white mb-4 border-b border-cyan-400 pb-2">Minhas Transações</h2>
-                    <TransactionTable
-                        transactions={transactions}
-                        loading={transactionsLoading}
-                        error={transactionsError}
-                        onEditClick={handleEditClick}
-                        onDeleteClick={handleDeleteClick} // Agora isso funciona
-                    />
+                {/* 2. ÁREA DA TABELA E GRÁFICO (Layout de Grid aplicado aqui) */}
+                <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    {/* Coluna da Esquerda (Tabela) */}
+                    <div className="lg:col-span-2">
+                        <h2 className="text-2xl font-bold text-white mb-4 border-b border-cyan-400 pb-2">Minhas Transações</h2>
+                        <TransactionTable
+                            transactions={transactions}
+                            loading={transactionsLoading}
+                            error={transactionsError}
+                            onEditClick={handleEditClick}
+                            onDeleteClick={handleDeleteClick}
+                        />
+                    </div>
+
+                    {/* Coluna da Direita (Gráfico) */}
+                    <div className="lg:col-span-1">
+                        <CategoryPieChart transactions={transactions} />
+                    </div>
+
                 </div>
+
 
                 {/* Botão Sair */}
                 <div className="mt-10 text-center">
