@@ -1,5 +1,5 @@
 // src/App.jsx
-import logoTop from '../assets/logoTop.png';
+import logBlue from '../assets/logBlue.png';
 import Header from '../components/header/Header';
 import About from '../components/about/About';
 import Function from '../components/function/Function';
@@ -18,7 +18,7 @@ function App() {
       <nav className="p-4 sticky top-0 z-50 bg-gray-900/90 backdrop-blur-sm shadow-xl shadow-gray-900/50">
         <div className="container mx-auto flex justify-between items-center px-4 md:px-0">
           <div className="flex items-center space-x-2">
-            <img src={logoTop} alt="" className='w-40 h-15' />
+            <img src={logBlue} alt="" className='w-40 h-15' />
           </div>
           <div className="flex items-center space-x-4">
             <a href="#planos" className="hidden sm:block text-gray-300 hover:text-cyan-400 font-medium">Planos</a>
