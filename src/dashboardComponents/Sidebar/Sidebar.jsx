@@ -1,9 +1,9 @@
 // src/components/Sidebar/Sidebar.jsx
 
 import React from 'react';
-import { NavLink } from 'react-router-dom'; 
+import { NavLink } from 'react-router-dom';
 
-import logBlack from '../../assets/logBlack.png'; 
+import logBlack from '../../assets/logBlack.png';
 import { RxDashboard } from "react-icons/rx";
 import { GoArrowSwitch } from "react-icons/go";
 import { IoAnalytics } from "react-icons/io5";
@@ -11,7 +11,7 @@ import { IoSettingsOutline } from "react-icons/io5";
 
 // 1. Aceitar as props 'isMobileMenuOpen' e 'setIsMobileMenuOpen'
 function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
-  
+
   const getLinkClass = ({ isActive }) => {
     // ... (sua função getLinkClass continua igual) ...
     const baseClasses = "flex items-center py-3 px-4 rounded-lg cursor-pointer transition-colors duration-200 no-underline";
@@ -28,26 +28,25 @@ function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
     // 3. Usamos um Fragment (<>) para ter o Sidebar e o Backdrop
     <>
       {/* Backdrop (sombra preta que fecha o menu ao clicar) */}
-      <div 
+      <div
         onClick={() => setIsMobileMenuOpen(false)}
-        className={`fixed inset-0 bg-black/50 z-20 md:hidden transition-opacity
-                    ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-      />
+        className={`fixed inset-0 bg-black/50 md:hidden transition-opacity
+              ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'} z-5`} />
 
       {/* 4. O Sidebar em si */}
       <nav className={`w-[250px] h-screen fixed left-0 top-0 
                       bg-white border-r border-gray-200 
                       p-6 flex flex-col shadow-md
-                      z-30 transition-transform duration-300 ease-in-out
+                      z-10 transition-transform duration-300 ease-in-out
                       ${mobileTransform} md:translate-x-0`} // 5. Classes mágicas!
       >
-        
+
         {/* --- Logo --- */}
         <div className="text-center mb-10">
-          <img 
-            src={logBlack} 
-            alt="Organize Já Logo" 
-            className="w-full max-w-[160px] h-auto mx-auto" 
+          <img
+            src={logBlack}
+            alt="Organize Já Logo"
+            className="w-full max-w-[160px] h-auto mx-auto"
           />
         </div>
 
