@@ -13,6 +13,8 @@ import HomePage from './pages/HomePage';
 // Importe os NOVOS componentes de layout
 import AppLayout from './pages/AppLayout';
 import ReportsPage from './pages/ReportsPage';
+import TransactionsPage from './pages/TransactionsPage';
+import SettingsPage from './pages/SettingsPage';
 // (No futuro, você vai criar e importar a TransactionsPage e SettingsPage)
 
 
@@ -38,11 +40,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           {/* /dashboard/relatorios */}
           <Route path="relatorios" element={<ReportsPage />} />
 
-          {/* /dashboard/transacoes (você criará esta página) */}
-          {/* <Route path="transacoes" element={<TransactionsPage />} /> */}
-          
-          {/* /dashboard/configuracoes (você criará esta página) */}
-          {/* <Route path="configuracoes" element={<SettingsPage />} /> */}
+         <Route path="transacoes" element={<TransactionsPage />} />
+         <Route path="configuracoes" element={<SettingsPage />} />
 
         </Route>
         
