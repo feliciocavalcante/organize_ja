@@ -195,7 +195,7 @@ const DashboardPage = () => {
             .select('*', { count: 'exact', head: true })
             .eq('user_id', user.id);
 
-        // 5. A Regra de Negócio
+        // 5. A Regra de Negóci
         const LIMITE_GRATIS = 5;
         if (count >= LIMITE_GRATIS) {
             // BLOQUEADO!
