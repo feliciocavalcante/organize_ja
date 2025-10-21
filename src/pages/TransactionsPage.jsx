@@ -40,12 +40,12 @@ const TransactionTable = ({ transactions, loading, error, onEditClick, onDeleteC
                     </div>
                     <div className="mt-2 md:mt-0 mr-2 md:text-right">
                         <span className="space-x-4">
-                            <button onClick={() => onEditClick(tx)} className="text-cyan-400 hover:text-cyan-300 text-sm font-semibold">
+                            <button onClick={() => onEditClick(tx)} className="text-cyan-400 cursor-pointer hover:text-cyan-300 text-sm font-semibold">
                                 Editar
                             </button>
                             <button
                                 onClick={() => onDeleteClick(tx)}
-                                className="text-red-500 hover:text-red-400 text-sm font-semibold"
+                                className="text-red-500 hover:text-red-400 cursor-pointer text-sm font-semibold"
                             >
                                 Excluir
                             </button>
