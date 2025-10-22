@@ -7,9 +7,10 @@ import { ArrowUp, ArrowDown, DollarSign } from 'lucide-react';
 import TransactionModal from '/src/pages/TransactionModal.jsx';
 import CategoryPieChart from '../dashboardComponents/Charts/CategoryPieChart';
 import UpgradeModal from '../planoModal/UpgradeModal.jsx';
-import toast from 'react-hot-toast'; // 1. IMPORTAR O TOAST
+import toast from 'react-hot-toast';
+import { useTransactions } from '../context/TransactionContext'; // 1. IMPORTAR O HOOK DO CONTEXTO
 
-// ... (Componente MetricCard - Sem alterações)
+// ... (Componente MetricCard - Sem alterações) ...
 const MetricCard = ({ title, value, icon: Icon, color, isTotal = false, totalValue = 0 }) => {
     let bgColor = 'bg-white';
     if (isTotal) {
@@ -26,12 +27,12 @@ const MetricCard = ({ title, value, icon: Icon, color, isTotal = false, totalVal
         </div>
     );
 };
-
-// ... (Componente TransactionTable - Sem alterações)
+// ... (Componente TransactionTable - Sem alterações) ...
 const TransactionTable = ({ transactions, loading, error, onEditClick, onDeleteClick }) => {
     if (loading) return <div className="text-gray-400 text-center p-6">Carregando transações...</div>;
     if (error) return <div className="text-red-400 text-center p-6">Erro ao buscar transações: {error}</div>;
-    if (transactions.length === 0) return <div className="text-gray-500 text-center p-6">Nenhuma transação encontrada.</div>;
+    // Garante que transactions é um array antes de verificar length
+    if (!Array.isArray(transactions) || transactions.length === 0) return <div className="text-gray-500 text-center p-6">Nenhuma transação encontrada.</div>;
     return (
         <div className="bg-gray-900 rounded-lg shadow-xl p-4">
             <div className="hidden md:grid grid-cols-6 gap-4 text-gray-500 font-semibold border-b border-gray-700 pb-3 mb-3 ">
@@ -64,35 +65,25 @@ const TransactionTable = ({ transactions, loading, error, onEditClick, onDeleteC
 
 // --- Dashboard Principal ---
 const DashboardPage = () => {
-    // ... (States - Sem alterações) ...
+    // --- States de Autenticação e Modais (Continuam) ---
     const [authLoading, setAuthLoading] = useState(true);
-    const [user, setUser] = useState(null);
+    // const [user, setUser] = useState(null); // REMOVIDO
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const navigate = useNavigate();
-    const [transactions, setTransactions] = useState([]);
-    const [transactionsLoading, setTransactionsLoading] = useState(true);
-    const [transactionsError, setTransactionsError] = useState(null);
     const [editingTransaction, setEditingTransaction] = useState(null);
-    
-    // ... (fetchTransactions - Sem alterações) ...
-    const fetchTransactions = async (userId) => {
-        setTransactionsLoading(true);
-        setTransactionsError(null);
-        if (!userId) {
-            setTransactionsError('Usuário não logado');
-            setTransactionsLoading(false);
-            return;
-        }
-        const { data, error } = await supabase.from('transacoes').select('*').eq('user_id', userId).order('data', { ascending: false });
-        if (error) {
-            console.error('Erro ao buscar transações:', error);
-            setTransactionsError(error.message);
-        } else {
-            setTransactions(data);
-        }
-        setTransactionsLoading(false);
-    };
+
+    // 2. USAR O HOOK DO CONTEXTO
+    const {
+        transactions,
+        loading: transactionsLoading, // Renomeado
+        error: transactionsError,
+        user,
+        refetchTransactions
+    } = useTransactions();
+
+    // REMOVIDO: fetchTransactions local
+    // const fetchTransactions = async (userId) => { /* ... */ };
 
     // ... (handleEditClick - Sem alterações) ...
     const handleEditClick = (transaction) => {
@@ -100,8 +91,9 @@ const DashboardPage = () => {
         setIsModalOpen(true);
     };
 
-    // 2. SUBSTITUIR ALERTAS NA FUNÇÃO DE DELETAR
+    // 3. ATUALIZAR handleDeleteClick para usar refetch
     const handleDeleteClick = async (transaction) => {
+        if (!user) return;
         if (window.confirm(`Tem certeza que deseja excluir a transação: "${transaction.descricao}"?`)) {
             const { error } = await supabase
                 .from('transacoes')
@@ -109,82 +101,82 @@ const DashboardPage = () => {
                 .eq('id', transaction.id);
 
             if (error) {
-                console.error('Erro ao deletar:', error);
-                // MUDANÇA AQUI
                 toast.error(`Erro ao deletar: ${error.message}`);
             } else {
-                // MUDANÇA AQUI
                 toast.success('Transação deletada com sucesso!');
-                fetchTransactions(user.id);
+                refetchTransactions(); // Chama a função do contexto
             }
         }
     };
 
-    // ... (useEffect fetchUserData - Sem alterações) ...
+    // useEffect de Autenticação - Simplificado
     useEffect(() => {
-        const fetchUserData = async () => {
-            setAuthLoading(true);
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
+        const checkUser = async () => {
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
+            if (!currentUser && !user) { // Verifica user do contexto tb
                 navigate('/auth');
-                return;
             }
-            setUser(user);
             setAuthLoading(false);
         };
-        fetchUserData();
-    }, [navigate]);
+        // Pequeno delay para garantir que o contexto teve tempo de carregar o user
+        const timer = setTimeout(checkUser, 50);
+        return () => clearTimeout(timer);
+    }, [navigate, user]); // Depende do user do contexto também
 
-    // ... (useEffect fetchTransactions - Sem alterações) ...
-    useEffect(() => {
-        if (user) {
-            fetchTransactions(user.id);
-        }
-    }, [user]);
+    // REMOVIDO: useEffect que chamava fetchTransactions localmente
+    // useEffect(() => { /* ... */ }, [user]);
 
-    // ... (handleOpenNewTransaction - Sem alterações) ...
+
+    // handleOpenNewTransaction - Atualizada para usar 'user' do contexto
     const handleOpenNewTransaction = async () => {
         if (!user) return;
+
         const { data: profiles, error: profileError } = await supabase.from('profiles').select('plan_type').eq('id', user.id);
-        let profile = { plan_type: 'free' }; 
-        if (!profileError && profiles && profiles.length > 0) {
-            profile = profiles[0];
-        }
+        let profile = { plan_type: 'free' };
+        if (!profileError && profiles && profiles.length > 0) profile = profiles[0];
+
         if (profile.plan_type !== 'free') {
             setEditingTransaction(null);
             setIsModalOpen(true);
             return;
         }
-        const { count, error: countError } = await supabase.from('transacoes').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
-        const LIMITE_GRATIS = 10;
-        if (count >= LIMITE_GRATIS) {
-            setIsUpgradeModalOpen(true);
+
+        // Usa transactions.length do contexto se disponível
+        const currentCount = Array.isArray(transactions) ? transactions.length : 0;
+        const LIMITE_GRATIS = 3;
+
+        if (currentCount >= LIMITE_GRATIS) {
+            // Contagem precisa para ter certeza (pode haver atraso no contexto)
+            const { count, error: countError } = await supabase
+                .from('transacoes')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', user.id);
+
+            if (count >= LIMITE_GRATIS) {
+                setIsUpgradeModalOpen(true);
+            } else {
+                setEditingTransaction(null);
+                setIsModalOpen(true);
+            }
+
         } else {
             setEditingTransaction(null);
             setIsModalOpen(true);
         }
     };
 
-    // 3. SUBSTITUIR ALERTAS NA FUNÇÃO DE UPGRADE
-    const handleUpgradePlan = async () => {
-        const { error } = await supabase
-            .from('profiles')
-            .upsert({ id: user.id, plan_type: 'pro' })
-            .eq('id', user.id);
-
-        if (error) {
-            // MUDANÇA AQUI
-            toast.error("Erro ao tentar fazer o upgrade. Tente novamente.");
-        } else {
-            // MUDANÇA AQUI
-            toast.success("Parabéns! Você agora é PRO e tem acesso ilimitado!");
-            setIsUpgradeModalOpen(false);
-            setIsModalOpen(true);
-        }
+    // handleUpgradePlan - Atualizada para usar 'user' do contexto
+    const handleUpgradePlan = () => {
+        if (!user) return; // Ainda checa o usuário
+        setIsUpgradeModalOpen(false); // Fecha o modal de alerta
+        navigate('/dashboard/checkout'); // Redireciona para a página de checkout
     };
 
-    // ... (useMemo - Sem alterações) ...
+    // useMemo - Usa 'transactions' do contexto
     const metrics = useMemo(() => {
+        // Adiciona checagem se transactions é array
+        if (!Array.isArray(transactions)) return { entradas: 'R$ 0,00', saidas: 'R$ 0,00', total: 'R$ 0,00', total_num: 0 };
+
         const entradas = transactions.filter(tx => tx.tipo === 'entrada').reduce((acc, tx) => acc + tx.valor, 0);
         const saidas = transactions.filter(tx => tx.tipo === 'saida').reduce((acc, tx) => acc + tx.valor, 0);
         const total = entradas - saidas;
@@ -195,17 +187,20 @@ const DashboardPage = () => {
             total: formatCurrency(total),
             total_num: total,
         };
-    }, [transactions]);
+    }, [transactions]); // Depende das transações do contexto
 
-    // ... (If Loading - Sem alterações) ...
+    // ---- Renderização ----
+
     if (authLoading) {
         return <div className="p-8 text-cyan-400">Verificando sessão...</div>;
     }
+    // Se o user do contexto ainda não carregou, espera (ou mostra loading)
     if (!user) {
-        return null; 
+        // Poderia retornar um spinner aqui
+        return <div className="p-8 text-gray-400">Carregando dados do usuário...</div>;
     }
 
-    // ... (JSX do return - Sem alterações) ...
+    // 4. JSX USA DADOS DO CONTEXTO
     return (
         <>
             <main className="container mx-auto p-4 md:p-16 max-w-7xl">
@@ -220,13 +215,29 @@ const DashboardPage = () => {
                             <h2 className="text-2xl font-bold text-white border-b border-cyan-400 pb-2">Minhas Transações</h2>
                             <button onClick={handleOpenNewTransaction} className="bg-cyan-600 cursor-pointer hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded transition-colors text-sm">Nova Transação</button>
                         </div>
-                        <TransactionTable transactions={transactions} loading={transactionsLoading} error={transactionsError} onEditClick={handleEditClick} onDeleteClick={handleDeleteClick} />
+                        <TransactionTable
+                            transactions={transactions || []} // Usa transactions do contexto
+                            loading={transactionsLoading} // Usa loading do contexto
+                            error={transactionsError} // Usa error do contexto
+                            onEditClick={handleEditClick}
+                            onDeleteClick={handleDeleteClick}
+                        />
                     </div>
-                    <div className="lg:col-span-1"><CategoryPieChart transactions={transactions} /></div>
+                    <div className="lg:col-span-1">
+                        <CategoryPieChart transactions={transactions || []} /> {/* Usa transactions do contexto */}
+                    </div>
                 </div>
             </main>
-            <TransactionModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTransaction(null); }} onTransactionSaved={() => fetchTransactions(user.id)} transactionToEdit={editingTransaction}/>
-            <UpgradeModal isOpen={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} onUpgrade={handleUpgradePlan}/>
+            {/* 5. MODAL CHAMA REFETCH DO CONTEXTO */}
+            <TransactionModal
+                isOpen={isModalOpen}
+                onClose={() => { setIsModalOpen(false); setEditingTransaction(null); }}
+                onTransactionSaved={refetchTransactions} // Chama refetch do contexto
+                transactionToEdit={editingTransaction} />
+            <UpgradeModal
+                isOpen={isUpgradeModalOpen}
+                onClose={() => setIsUpgradeModalOpen(false)}
+                onUpgrade={handleUpgradePlan} />
         </>
     );
 };
