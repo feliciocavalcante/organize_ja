@@ -1,43 +1,44 @@
 // src/pages/BudgetsPage.jsx
 
-import React, { useState, useEffect } from 'react'; // useEffect ainda necessário para budgets
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import BudgetModal from './BudgetModal';
 import { Plus } from 'lucide-react';
 import BudgetProgressCard from './BudgetProgressCard';
 import toast from 'react-hot-toast';
-import { useTransactions } from '../context/TransactionContext'; // 1. IMPORTAR O HOOK
+import { useTransactions } from '../context/TransactionContext'; // Continua usando o hook
 
 // ... (Função formatMonth - Sem alterações) ...
-const formatMonth = (dateString) => { /* ... */ };
+const formatMonth = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString + 'T00:00:00');
+    return date.toLocaleString('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+};
 
 function BudgetsPage() {
-    // States locais para Budgets e Modal (Continuam)
+    // States locais apenas para Budgets e Modal
     const [budgets, setBudgets] = useState([]);
-    const [loadingBudgets, setLoadingBudgets] = useState(true); // Renomeado para clareza
+    const [loadingBudgets, setLoadingBudgets] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingBudget, setEditingBudget] = useState(null);
     const navigate = useNavigate();
 
-    // REMOVIDO: State local para transactions
-    // const [transactions, setTransactions] = useState([]);
-
-    // 2. USAR O HOOK DO CONTEXTO para pegar as transações
+    // PEGAR DADOS DO CONTEXTO (usuário, transações, loading das transações)
     const {
         transactions,
-        loading: loadingTransactions, // Renomeado para clareza
+        loading: loadingTransactions, // Renomeado
         error: errorTransactions,
-        user, // Pega o usuário do contexto
-        // refetchTransactions // Não precisamos recarregar transações aqui
+        user
+        // Não precisamos do refetchTransactions aqui
     } = useTransactions();
 
 
-    // 3. FUNÇÃO PARA BUSCAR APENAS OS ORÇAMENTOS
+    // FUNÇÃO SIMPLIFICADA: Busca apenas os orçamentos
     const fetchBudgets = async (userId) => {
-        if (!userId) return; // Segurança
+        if (!userId) return;
 
-        console.log("BudgetsPage: Buscando orçamentos..."); // Debug
+        console.log("BudgetsPage: Buscando orçamentos...");
         setLoadingBudgets(true);
         const { data, error } = await supabase
             .from('budgets')
@@ -47,56 +48,53 @@ function BudgetsPage() {
 
         if (error) {
             console.error('Erro ao buscar orçamentos:', error);
-            // Poderíamos usar toast.error aqui também
+            toast.error('Erro ao carregar orçamentos.'); // Adiciona toast de erro
         } else {
-            setBudgets(data);
+            setBudgets(data || []); // Garante que é um array
         }
         setLoadingBudgets(false);
     };
 
-    // REMOVIDO: Função fetchData que buscava tudo
-    // const fetchData = async (userId) => { /* ... */ };
-
-    // REMOVIDO: useEffect fetchUser (o contexto já fornece o user)
-    // useEffect(() => { /* ... */ }, [navigate]);
-
-    // 4. ATUALIZADO: useEffect busca budgets QUANDO o user do contexto for definido
+    // useEffect para segurança e busca inicial de budgets
     useEffect(() => {
-        if (user) {
-            fetchBudgets(user.id);
-        } else if (!user && !loadingTransactions) { // Se o contexto não está carregando e não tem user
-             // Adiciona um pequeno delay para garantir que o user do contexto foi carregado
-            const timer = setTimeout(() => {
-                // Re-verifica o user do contexto antes de redirecionar
-                if (!user) {
-                     navigate('/auth');
-                }
-            }, 100);
-            return () => clearTimeout(timer);
-        }
+        // A lógica de segurança (redirecionar se não houver user)
+        const checkUserAndFetch = () => {
+             if (!user && !loadingTransactions) { // Se contexto carregou e não tem user
+                 navigate('/auth');
+             } else if (user) {
+                 // Se tem usuário, busca os orçamentos (APENAS orçamentos)
+                 fetchBudgets(user.id);
+             }
+         };
+
+        // Roda a verificação após um pequeno delay para garantir que o contexto carregou
+        const timer = setTimeout(checkUserAndFetch, 50);
+
+        return () => clearTimeout(timer); // Limpa o timer
+
     }, [user, loadingTransactions, navigate]); // Depende do user e loading do contexto
 
 
-    // 5. ATUALIZADO: handleBudgetSaved chama fetchBudgets local
+    // handleBudgetSaved chama APENAS fetchBudgets
     const handleBudgetSaved = () => {
-        fetchBudgets(user.id); // Recarrega APENAS os orçamentos
+        if(user) fetchBudgets(user.id); // Recarrega orçamentos
         setEditingBudget(null);
         setIsModalOpen(false);
     };
 
-    // ... (handleModalClose - Sem alterações) ...
+    // handleModalClose (igual)
     const handleModalClose = () => {
         setEditingBudget(null);
         setIsModalOpen(false);
     };
 
-    // ... (handleEditClick - Sem alterações) ...
+    // handleEditClick (igual)
     const handleEditClick = (budget) => {
         setEditingBudget(budget);
         setIsModalOpen(true);
     };
 
-    // 6. ATUALIZADO: handleDeleteClick chama fetchBudgets local
+    // handleDeleteClick chama APENAS fetchBudgets
     const handleDeleteClick = async (budget) => {
         if (!user) return;
         if (window.confirm(`Tem certeza que deseja excluir o orçamento para "${budget.category}" em ${formatMonth(budget.month)}?`)) {
@@ -110,28 +108,22 @@ function BudgetsPage() {
                 toast.error(`Erro ao excluir: ${error.message}`);
             } else {
                 toast.success('Orçamento excluído com sucesso!');
-                fetchBudgets(user.id); // Recarrega APENAS os orçamentos
+                fetchBudgets(user.id); // Recarrega orçamentos
             }
         }
     };
 
-
-    // Define um estado combinado de loading
+    // Loading combinado (loading dos budgets + loading das transações do contexto)
     const isLoading = loadingBudgets || loadingTransactions;
 
     // ----- Renderização -----
 
-    // Se o usuário ainda não carregou (do contexto), mostra loading inicial
-    // Ou se o authLoading do DashboardPage não rodou ainda
-     if (!user && loadingTransactions) {
+     if (!user && loadingTransactions) { // Se contexto ainda está buscando user
          return <div className="p-8 text-gray-400">Carregando dados...</div>;
      }
-
-     // Se explicitamente não há user após loading, já deve ter redirecionado, mas como fallback:
-     if (!user && !loadingTransactions) {
-         return null; // Ou um redirect <Navigate to="/auth" /> se usar react-router
+     if (!user && !loadingTransactions) { // Se contexto terminou e não achou user
+         return null; // ou <Navigate to="/auth" />
      }
-
 
     return (
         <div className="p-8">
@@ -147,14 +139,13 @@ function BudgetsPage() {
                 </button>
             </div>
 
-            {/* --- Loading ou Lista Vazia --- */}
-            {/* Usa o loading combinado */}
-            {isLoading && <p className="text-gray-400">Carregando orçamentos...</p>}
+            {/* --- Loading / Erro / Lista Vazia --- */}
+            {isLoading && <p className="text-gray-400 text-center py-10">Carregando dados...</p>}
+            
+            {/* Mostra erro das transações (vindo do contexto) se houver */}
+            {errorTransactions && <p className="text-red-400 text-center py-10">Erro ao carregar transações: {errorTransactions}</p>}
 
-            {/* Mostra erro das transações se houver */}
-            {errorTransactions && <p className="text-red-400">Erro ao carregar transações: {errorTransactions}</p>}
-
-            {!isLoading && budgets.length === 0 && (
+            {!isLoading && budgets.length === 0 && !errorTransactions && (
                 <div className="text-center p-12 bg-gray-800 rounded-lg border border-gray-700">
                     <h3 className="text-2xl font-semibold text-white">Nenhum orçamento criado</h3>
                     <p className="text-gray-400 mt-2 mb-4">Clique em "Novo Orçamento" para começar.</p>
@@ -162,8 +153,8 @@ function BudgetsPage() {
             )}
 
             {/* --- Lista de Orçamentos --- */}
-            {/* Usa o loading combinado e passa transactions do contexto */}
-            {!isLoading && budgets.length > 0 && (
+            {/* Usa isLoading e passa transactions do contexto */}
+            {!isLoading && budgets.length > 0 && !errorTransactions && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {budgets.map((budget) => (
                         <BudgetProgressCard
@@ -182,7 +173,7 @@ function BudgetsPage() {
                 isOpen={isModalOpen}
                 onClose={handleModalClose}
                 onBudgetSaved={handleBudgetSaved}
-                user={user} // Passa o user do contexto
+                user={user} // Passa user do contexto
                 budgetToEdit={editingBudget}
             />
         </div>
