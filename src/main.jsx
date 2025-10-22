@@ -16,6 +16,7 @@ import ReportsPage from './pages/ReportsPage';
 import TransactionsPage from './pages/TransactionsPage';
 import SettingsPage from './pages/SettingsPage';
 import CheckoutPage from './pages/CheckoutPage';
+import BudgetsPage from './pages/BudgetsPage';
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -31,6 +32,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="transacoes" element={<TransactionsPage />} />
           <Route path="configuracoes" element={<SettingsPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
+          <Route path="orcamentos" element={<BudgetsPage />} />
 
         </Route>
 

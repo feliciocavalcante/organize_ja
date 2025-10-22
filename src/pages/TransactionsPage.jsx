@@ -1,23 +1,16 @@
 // src/pages/TransactionsPage.jsx
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import TransactionModal from '/src/pages/TransactionModal.jsx';
+import toast from 'react-hot-toast'; // 1. IMPORTAR O TOAST
 
-
+// ... (Componente TransactionTable - Sem alterações) ...
 const TransactionTable = ({ transactions, loading, error, onEditClick, onDeleteClick }) => {
-    // ... (Este componente está perfeito, sem alterações) ...
-    if (loading) {
-        return <div className="text-gray-400 text-center p-6">Carregando transações...</div>;
-    }
-    if (error) {
-        return <div className="text-red-400 text-center p-6">Erro ao buscar transações: {error}</div>;
-    }
-    if (transactions.length === 0) {
-        return <div className="text-gray-500 text-center p-6">Nenhuma transação encontrada para este filtro.</div>;
-    }
-
+    if (loading) return <div className="text-gray-400 text-center p-6">Carregando transações...</div>;
+    if (error) return <div className="text-red-400 text-center p-6">Erro ao buscar transações: {error}</div>;
+    if (transactions.length === 0) return <div className="text-gray-500 text-center p-6">Nenhuma transação encontrada para este filtro.</div>;
     return (
         <div className="bg-gray-800 rounded-lg shadow-xl p-4 mt-6">
             <div className="hidden md:grid grid-cols-6 gap-4 text-gray-500 font-semibold border-b border-gray-700 pb-3 mb-3 ">
@@ -35,20 +28,11 @@ const TransactionTable = ({ transactions, loading, error, onEditClick, onDeleteC
                         R$ {tx.valor.toFixed(2).replace('.', ',')}
                     </div>
                     <div className="text-gray-400 text-sm md:text-base">{tx.categoria}</div>
-                    <div className="text-gray-400 text-sm md:text-base">
-                        {new Date(tx.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
-                    </div>
+                    <div className="text-gray-400 text-sm md:text-base">{new Date(tx.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</div>
                     <div className="mt-2 md:mt-0 mr-2 md:text-right">
                         <span className="space-x-4">
-                            <button onClick={() => onEditClick(tx)} className="text-cyan-400 cursor-pointer hover:text-cyan-300 text-sm font-semibold">
-                                Editar
-                            </button>
-                            <button
-                                onClick={() => onDeleteClick(tx)}
-                                className="text-red-500 hover:text-red-400 cursor-pointer text-sm font-semibold"
-                            >
-                                Excluir
-                            </button>
+                            <button onClick={() => onEditClick(tx)} className="text-cyan-400 hover:text-cyan-300 text-sm font-semibold">Editar</button>
+                            <button onClick={() => onDeleteClick(tx)} className="text-red-500 hover:text-red-400 text-sm font-semibold">Excluir</button>
                         </span>
                     </div>
                 </div>
@@ -56,11 +40,10 @@ const TransactionTable = ({ transactions, loading, error, onEditClick, onDeleteC
         </div>
     );
 };
-// --- Fim: Cópia do TransactionTable ---
-
 
 // --- Página Principal de Transações ---
 function TransactionsPage() {
+    // ... (States - Sem alterações) ...
     const [user, setUser] = useState(null);
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -68,45 +51,28 @@ function TransactionsPage() {
     const navigate = useNavigate();
     const [filtroTexto, setFiltroTexto] = useState('');
     const [filtroTipo, setFiltroTipo] = useState('');
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState(null);
 
-    // 1. Verificar usuário
+    // ... (useEffect fetchUser - Sem alterações) ...
     useEffect(() => {
         const fetchUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                navigate('/auth');
-            } else {
-                setUser(user);
-            }
+            if (!user) navigate('/auth');
+            else setUser(user);
         };
         fetchUser();
     }, [navigate]);
 
-    // 2. Função para buscar transações (Sua lógica estava correta)
+    // ... (fetchTransactions - Sem alterações) ...
     const fetchTransactions = async (userId, texto, tipo) => {
         setLoading(true);
         setError(null);
-
-        let query = supabase
-            .from('transacoes')
-            .select('*')
-            .eq('user_id', userId)
-
-        if (texto) {
-            query = query.ilike('descricao', `%${texto}%`);
-        }
-
-        if (tipo) {
-            query = query.eq('tipo', tipo);
-        }
-        
-        query = query.order('data', { ascending: false }); // Ordem aplicada no final
-
+        let query = supabase.from('transacoes').select('*').eq('user_id', userId);
+        if (texto) query = query.ilike('descricao', `%${texto}%`);
+        if (tipo) query = query.eq('tipo', tipo);
+        query = query.order('data', { ascending: false });
         const { data, error } = await query;
-
         if (error) {
             console.error('Erro ao buscar transações:', error);
             setError(error.message);
@@ -116,106 +82,68 @@ function TransactionsPage() {
         setLoading(false);
     };
 
-    // 3. Buscar transações (Sua lógica estava correta)
+    // ... (useEffect fetchTransactions - Sem alterações) ...
     useEffect(() => {
         if (user) {
             fetchTransactions(user.id, filtroTexto, filtroTipo);
         }
     }, [user, filtroTexto, filtroTipo]);
 
-    // 4. Funções de Ação (Editar e Deletar)
+    // ... (handleEditClick - Sem alterações) ...
     const handleEditClick = (transaction) => {
         setEditingTransaction(transaction);
         setIsModalOpen(true);
     };
 
+    // 2. SUBSTITUIR ALERTAS NA FUNÇÃO DE DELETAR
     const handleDeleteClick = async (transaction) => {
-        if (window.confirm(`Tem certeza que deseja excluir: "${transaction.descricao}"?`)) {
+        // O window.confirm() pode continuar, pois é uma pergunta, não uma notificação
+        if (window.confirm(`Tem certeza que deseja excluir: "${transaction.descricao}"?`)) { 
             const { error } = await supabase
                 .from('transacoes')
                 .delete()
                 .eq('id', transaction.id);
 
             if (error) {
-                alert(`Erro ao deletar: ${error.message}`);
+                // MUDANÇA AQUI
+                toast.error(`Erro ao deletar: ${error.message}`);
             } else {
-                alert('Transação deletada!');
-                // CORREÇÃO: Passar os filtros atuais ao recarregar
+                // MUDANÇA AQUI
+                toast.success('Transação deletada!');
                 fetchTransactions(user.id, filtroTexto, filtroTipo);
             }
         }
     };
 
-    // 5. Função para recarregar quando o modal fechar
+    // ... (handleModalClose - Sem alterações) ...
     const handleModalClose = () => {
         setIsModalOpen(false);
         setEditingTransaction(null);
-        // CORREÇÃO: Passar os filtros atuais ao recarregar
         fetchTransactions(user.id, filtroTexto, filtroTipo);
     };
 
+    // ... (JSX do return - Sem alterações) ...
     return (
         <div className="p-8">
-            <h1 className="text-3xl font-bold text-white mb-6">
-                Minhas Transações
-            </h1>
-
-            {/* --- CORREÇÃO: JSX DOS FILTROS ADICIONADO --- */}
+            <h1 className="text-3xl font-bold text-white mb-6">Minhas Transações</h1>
             <div className="bg-gray-800 p-4 rounded-lg shadow-lg mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    
-                    {/* Filtro por Texto */}
                     <div>
-                        <label htmlFor="filtroTexto" className="block text-sm font-medium text-gray-300 mb-1">
-                            Buscar por Título
-                        </label>
-                        <input
-                            type="text"
-                            id="filtroTexto"
-                            value={filtroTexto}
-                            onChange={(e) => setFiltroTexto(e.target.value)}
-                            placeholder="Ex: Supermercado"
-                            className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
-                        />
+                        <label htmlFor="filtroTexto" className="block text-sm font-medium text-gray-300 mb-1">Buscar por Título</label>
+                        <input type="text" id="filtroTexto" value={filtroTexto} onChange={(e) => setFiltroTexto(e.target.value)} placeholder="Ex: Supermercado" className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-cyan-500 focus:border-cyan-500" />
                     </div>
-
-                    {/* Filtro por Tipo */}
                     <div>
-                        <label htmlFor="filtroTipo" className="block text-sm font-medium text-gray-300 mb-1">
-                            Filtrar por Tipo
-                        </label>
-                        <select
-                            id="filtroTipo"
-                            value={filtroTipo}
-                            onChange={(e) => setFiltroTipo(e.target.value)}
-                            className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
-                        >
+                        <label htmlFor="filtroTipo" className="block text-sm font-medium text-gray-300 mb-1">Filtrar por Tipo</label>
+                        <select id="filtroTipo" value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)} className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-cyan-500 focus:border-cyan-500">
                             <option value="">Todos</option>
                             <option value="entrada">Entradas</option>
                             <option value="saida">Saídas</option>
                         </select>
                     </div>
-                    
                 </div>
             </div>
-
-            {/* --- Tabela --- */}
-            <TransactionTable
-                transactions={transactions}
-                loading={loading}
-                error={error}
-                onEditClick={handleEditClick}
-                onDeleteClick={handleDeleteClick}
-            />
-
-            {/* --- Modal --- */}
-            <TransactionModal
-                isOpen={isModalOpen}
-                onClose={handleModalClose}
-                onTransactionSaved={handleModalClose}
-                transactionToEdit={editingTransaction}
-            />
-
+            <TransactionTable transactions={transactions} loading={loading} error={error} onEditClick={handleEditClick} onDeleteClick={handleDeleteClick} />
+            <TransactionModal isOpen={isModalOpen} onClose={handleModalClose} onTransactionSaved={handleModalClose} transactionToEdit={editingTransaction} />
         </div>
     );
 }

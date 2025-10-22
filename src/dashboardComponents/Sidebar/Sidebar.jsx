@@ -1,13 +1,12 @@
 // src/components/Sidebar/Sidebar.jsx
 
-import React from 'react';
 import { NavLink } from 'react-router-dom';
-
 import logBlack from '../../assets/logBlack.png';
 import { RxDashboard } from "react-icons/rx";
 import { GoArrowSwitch } from "react-icons/go";
 import { IoAnalytics } from "react-icons/io5";
 import { IoSettingsOutline } from "react-icons/io5";
+import { PiPiggyBankBold } from "react-icons/pi";
 
 // 1. Aceitar as props 'isMobileMenuOpen' e 'setIsMobileMenuOpen'
 function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
@@ -68,6 +67,12 @@ function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
             <NavLink to="/dashboard/relatorios" className={getLinkClass}>
               <IoAnalytics className="text-xl mr-4" />
               <span className="font-medium text-base">Relatórios</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/dashboard/orcamentos" className={getLinkClass}>
+              <PiPiggyBankBold className="text-xl mr-4" />
+              <span className="font-medium text-base">Orçamentos</span>
             </NavLink>
           </li>
           <li>

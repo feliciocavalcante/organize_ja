@@ -4,12 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { CreditCard, User, Home, Lock } from 'lucide-react';
+import toast from 'react-hot-toast'; // 1. IMPORTAR O TOAST
 
 function CheckoutPage() {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    // const [error, setError] = useState(''); // 2. REMOVIDO (toast vai cuidar disso)
     
     // --- States do Formulário ---
     const [fullName, setFullName] = useState('');
@@ -18,7 +19,7 @@ function CheckoutPage() {
     const [cardExpiry, setCardExpiry] = useState('');
     const [cardCVC, setCardCVC] = useState('');
 
-    // 1. Busca o usuário e o nome dele (para preencher o formulário)
+    // ... (useEffect fetchUserData - Sem alterações) ...
     useEffect(() => {
         const fetchUserData = async () => {
             setLoading(true);
@@ -29,7 +30,6 @@ function CheckoutPage() {
             }
             setUser(user);
 
-            // Busca o nome atual para preencher o campo
             const { data: profiles, error } = await supabase
                 .from('profiles')
                 .select('full_name')
@@ -43,41 +43,40 @@ function CheckoutPage() {
         fetchUserData();
     }, [navigate]);
 
-    // 2. Função de "Simular Pagamento"
+    // 3. ATUALIZAR A FUNÇÃO DE PAGAMENTO
     const handleSubmitPayment = async (e) => {
         e.preventDefault();
         
-        // Validação simples (só para simular)
+        // Validação
         if (cardNumber.length < 16 || cardExpiry.length < 4 || cardCVC.length < 3) {
-            setError('Dados do cartão inválidos. Por favor, preencha corretamente.');
+            // MUDANÇA AQUI
+            toast.error('Dados do cartão inválidos. Por favor, preencha corretamente.');
             return;
         }
         
         setLoading(true);
-        setError('');
+        // setError(''); // REMOVIDO
 
-        // 3. A "COMPRA"!
-        // Atualizamos o perfil com os novos dados E o novo plano
+        // Atualiza o perfil (Upsert)
         const { error: updateError } = await supabase
             .from('profiles')
             .upsert({
                 id: user.id,
                 full_name: fullName,
                 address: address,
-                plan_type: 'pro' // <-- O UPGRADE ACONTECE AQUI!
+                plan_type: 'pro'
             })
             .eq('id', user.id);
 
         if (updateError) {
-            setError(updateError.message);
+            // MUDANÇA AQUI
+            toast.error(updateError.message);
             setLoading(false);
         } else {
-            // 4. SUCESSO!
-            // Espera 1 segundo para o usuário ver a "aprovação"
-            setTimeout(() => {
-                alert('Pagamento aprovado! Bem-vindo(a) ao Plano PRO!');
-                navigate('/dashboard'); // Manda de volta para o dashboard
-            }, 1000);
+            // MUDANÇA AQUI
+            // Removemos o setTimeout para a resposta ser imediata
+            toast.success('Pagamento aprovado! Bem-vindo(a) ao Plano PRO!');
+            navigate('/dashboard'); 
         }
     };
 
@@ -91,12 +90,11 @@ function CheckoutPage() {
                 <form onSubmit={handleSubmitPayment}>
                     <div className="space-y-6">
                         
-                        {/* --- Seção 1: Dados Pessoais --- */}
+                        {/* --- Seção 1: Dados Pessoais (Sem alterações) --- */}
                         <h2 className="text-xl font-semibold text-white border-b border-gray-700 pb-2 flex items-center">
                             <User className="w-5 h-5 mr-3 text-lime-400"/>
                             Seus Dados
                         </h2>
-                        
                         <div>
                             <label htmlFor="fullName" className="block text-sm font-medium text-gray-300 mb-1">
                                 Nome Completo (como no cartão)
@@ -125,12 +123,11 @@ function CheckoutPage() {
                             />
                         </div>
 
-                        {/* --- Seção 2: Dados do Cartão (Fictício) --- */}
+                        {/* --- Seção 2: Dados do Cartão (Sem alterações) --- */}
                         <h2 className="text-xl font-semibold text-white border-b border-gray-700 pb-2 flex items-center">
                             <CreditCard className="w-5 h-5 mr-3 text-lime-400"/>
                             Dados de Pagamento (Simulado)
                         </h2>
-
                         <div>
                             <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-300 mb-1">
                                 Número do Cartão (16 dígitos)
@@ -139,14 +136,13 @@ function CheckoutPage() {
                                 type="text"
                                 id="cardNumber"
                                 value={cardNumber}
-                                onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, '').slice(0, 16))} // Só números
+                                onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, '').slice(0, 16))}
                                 placeholder="0000 0000 0000 0000"
                                 maxLength={16}
                                 required
                                 className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-lime-500 focus:border-lime-500"
                             />
                         </div>
-                        
                         <div className="flex gap-4">
                             <div className="w-1/2">
                                 <label htmlFor="cardExpiry" className="block text-sm font-medium text-gray-300 mb-1">
@@ -180,7 +176,7 @@ function CheckoutPage() {
                             </div>
                         </div>
 
-                        {/* --- Botão de Pagar --- */}
+                        {/* --- Botão de Pagar (Sem alterações) --- */}
                         <button
                             type="submit"
                             disabled={loading}
@@ -193,10 +189,6 @@ function CheckoutPage() {
                                 </>
                             )}
                         </button>
-                        
-                        {error && (
-                            <p className="text-red-400 text-center">{error}</p>
-                        )}
                     </div>
                 </form>
             </div>

@@ -4,25 +4,39 @@ import React, { useState } from 'react'; // 1. Importar o useState
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../dashboardComponents/Sidebar/Sidebar';
 import Header from '../dashboardComponents/header/Header'; 
+import { Toaster } from 'react-hot-toast';
 
 function AppLayout() {
   
-  // 2. Adicionar o state para controlar o menu mobile
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-gray-900">
       
+      {/* 2. ADICIONAR O COMPONENTE 
+          Ele vai "ouvir" e exibir qualquer 'toast' chamado no app.
+      */}
+      <Toaster 
+        position="top-right" // Posição (canto superior direito)
+        toastOptions={{
+          // Estilos padrão para o dark mode
+          style: {
+            background: '#333', // Fundo cinza escuro
+            color: '#fff', // Texto branco
+          },
+        }}
+      />
+
       <Sidebar 
-        isMobileMenuOpen={isMobileMenuOpen} // 3. Passar o state para o Sidebar
+        isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen} 
       />
 
-      {/* 4. O conteúdo principal agora é 100% no mobile e tem margem no desktop */}
+      {/* O resto do seu layout continua igual */}
       <div className="flex-1 w-full md:ml-[250px] flex flex-col">
         
         <Header 
-          setIsMobileMenuOpen={setIsMobileMenuOpen} // 5. Passar o "setter" para o Header
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
         />
 
         <main className="flex-1">
