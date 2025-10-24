@@ -78,12 +78,12 @@ function Header({ setIsMobileMenuOpen }) {
         
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 
+          className="cursor-pointer flex items-center gap-2 
                        text-gray-400 hover:text-white 
                        transition-colors duration-200"
         >
           <LogOut className="w-5 h-5" />
-          <span className="text-sm font-medium">Sair</span>
+          <span className="cursor-pointer text-sm font-medium">Sair</span>
         </button>
       </div>
     </header>

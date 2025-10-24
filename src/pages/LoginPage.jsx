@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-// Mantendo apenas a logo usada
 import logBluee from '../assets/logBluee.png';
+import { Eye, EyeOff } from 'lucide-react'; // Ícones de olho
 
 const LoginPage = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -13,8 +13,28 @@ const LoginPage = () => {
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
-    // Mantendo o gradiente original
+    // State para mostrar/ocultar senha (funciona em ambos os modos)
+    const [showPassword, setShowPassword] = useState(false);
+    // State para "Lembrar-me" (só relevante para login)
+    const [rememberMe, setRememberMe] = useState(false);
+
     const highlightGradient = 'bg-gradient-to-r from-blue-500 to-cyan-400';
+
+    // Busca email lembrado APENAS se estiver na tela de login
+    useEffect(() => {
+        if (isLogin) { // <-- SÓ EXECUTA NO LOGIN
+            const rememberedEmail = localStorage.getItem('rememberedEmail');
+            if (rememberedEmail) {
+                setEmail(rememberedEmail);
+                setRememberMe(true);
+            }
+        } else {
+            // Limpa o email se mudar para cadastro e ele tiver sido preenchido
+            // (Opcional, mas evita confusão)
+             // setEmail(''); // Descomente se quiser limpar o email ao mudar para cadastro
+             setRememberMe(false); // Garante que checkbox não fique marcado
+        }
+    }, [isLogin]); // Roda quando 'isLogin' muda
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,17 +47,12 @@ const LoginPage = () => {
             // --- Fluxo de LOGIN ---
             result = await supabase.auth.signInWithPassword({ email, password });
         } else {
-            // --- Fluxo de CADASTRO (SIGN UP) ---
-            
-            // CORREÇÃO ESSENCIAL: Passar o nome para options.data
+            // --- Fluxo de CADASTRO ---
+            // (Lógica de cadastro permanece a mesma, enviando o nome)
             result = await supabase.auth.signUp({
                 email,
                 password,
-                options: {
-                    data: {
-                        full_name: fullName // Chave deve ser 'full_name'
-                    }
-                }
+                options: { data: { full_name: fullName } }
             });
         }
 
@@ -46,33 +61,27 @@ const LoginPage = () => {
         if (error) {
             setMessage(`ERRO: ${error.message}`);
         } else if (!isLogin && data.user) {
-            // Cadastro OK (Trigger cuidará do profile)
-            setMessage('Cadastro realizado! Verifique seu email para confirmar antes de fazer login.');
+            // Cadastro OK
+            setMessage('Cadastro realizado! Verifique seu email para confirmar.');
             setIsLogin(true); // Muda para login
-            // Limpa os campos
-            setFullName('');
-            setEmail('');
-            setPassword('');
-            
-            // REMOVIDO: Tentativa manual de insert (Trigger faz isso)
-            /*
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .insert([{ id: data.user.id, full_name: fullName }]);
-            if (profileError) console.error("Erro perfil:", profileError.message);
-            */
-
+            setFullName(''); setEmail(''); setPassword('');
         } else if (isLogin && data.user) {
             // Login OK
             setMessage('Login bem-sucedido!');
+
+            // Lógica do "Lembrar-me" SÓ AQUI no login
+            if (rememberMe) {
+                localStorage.setItem('rememberedEmail', email);
+            } else {
+                localStorage.removeItem('rememberedEmail');
+            }
+
             navigate('/dashboard');
         } else if (!isLogin && !data.user && !error) {
-             // Caso: SignUp OK mas requer confirmação
-             setMessage('Cadastro realizado! Verifique seu email para confirmar antes de fazer login.');
+             // SignUp OK mas requer confirmação
+             setMessage('Cadastro realizado! Verifique seu email para confirmar.');
              setIsLogin(true);
-             setFullName('');
-             setEmail('');
-             setPassword('');
+             setFullName(''); setEmail(''); setPassword('');
         }
 
         setLoading(false);
@@ -82,13 +91,8 @@ const LoginPage = () => {
         <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
             <div className="w-full max-w-md bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-800">
 
-                {/* Logo */}
                 <div className="flex justify-center mb-6">
-                    <img
-                        src={logBluee}
-                        alt="Logo Organize Já"
-                        className="h-16 object-contain w-auto"
-                    />
+                    <img src={logBluee} alt="Logo Organize Já" className="h-16 object-contain w-auto" />
                 </div>
 
                 <h2 className="text-3xl font-bold text-white text-center mb-2">
@@ -100,7 +104,7 @@ const LoginPage = () => {
 
                 <form onSubmit={handleSubmit}>
 
-                    {/* Input Nome (Apenas Cadastro) */}
+                    {/* Input Nome (Aparece SÓ no Cadastro) */}
                     {!isLogin && (
                         <div className="mb-4">
                             <label className="block text-gray-300 text-sm font-bold mb-2">Seu Nome Completo</label>
@@ -109,13 +113,13 @@ const LoginPage = () => {
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                                 required
-                                className="shadow appearance-none border border-gray-700 rounded w-full py-3 px-4 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-800 transition-colors" // Cor original cyan
+                                className="shadow appearance-none border border-gray-700 rounded w-full py-3 px-4 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-800 transition-colors"
                                 placeholder="Seu nome"
                             />
                         </div>
                     )}
 
-                    {/* Input Email */}
+                    {/* Input Email (Aparece em ambos) */}
                     <div className="mb-4">
                         <label className="block text-gray-300 text-sm font-bold mb-2">Email</label>
                         <input
@@ -123,27 +127,61 @@ const LoginPage = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="shadow appearance-none border border-gray-700 rounded w-full py-3 px-4 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-800 transition-colors" // Cor original cyan
+                            className="shadow appearance-none border border-gray-700 rounded w-full py-3 px-4 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-800 transition-colors"
                             placeholder="seu@email.com"
                         />
                     </div>
 
-                    {/* Input Senha */}
-                    <div className="mb-6">
+                    {/* Input Senha com botão de mostrar/ocultar (Aparece em ambos) */}
+                    <div className="mb-4 relative">
                         <label className="block text-gray-300 text-sm font-bold mb-2">Senha</label>
                         <input
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="shadow appearance-none border border-gray-700 rounded w-full py-3 px-4 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-800 transition-colors" // Cor original cyan
+                            className="shadow appearance-none border border-gray-700 rounded w-full py-3 px-4 pr-10 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-800 transition-colors"
                             placeholder="••••••••••••"
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            // Ajuste 'top-7' ou similar se o label da senha tiver altura diferente
+                            className="cursor-pointer absolute inset-y-0 right-0 top-7 pr-3 flex items-center text-sm leading-5" 
+                            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                        >
+                            {showPassword ? (
+                                <EyeOff className="h-5 w-5 text-gray-400" />
+                            ) : (
+                                <Eye className="h-5 w-5 text-gray-400" />
+                            )}
+                        </button>
                     </div>
+
+                     {/* Checkbox "Lembrar-me" (Aparece SÓ no Login) */}
+                     {isLogin && (
+                        <div className="mb-6 flex items-center">
+                            <input
+                                type="checkbox"
+                                id="rememberMe"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="cursor-pointer h-4 w-4 rounded border-gray-600 bg-gray-700 text-cyan-600 focus:ring-offset-gray-900 focus:ring-cyan-500" // Adicionado focus:ring-offset
+                            />
+                            <label htmlFor="rememberMe" className="cursor-pointer ml-2 block text-sm text-gray-300">
+                                Lembrar meu email
+                            </label>
+                            {/* Futuro: Adicionar link "Esqueci minha senha" aqui */}
+                        </div>
+                    )}
+
+                    {/* Adiciona margem inferior apenas se o checkbox não estiver visível (modo cadastro) */}
+                    {!isLogin && <div className="mb-6"></div>}
+
 
                     {/* Mensagem de Status */}
                     {message && (
-                        <p className={`mb-4 text-center text-sm ${message.startsWith('ERRO') ? 'text-red-400' : 'text-green-400'}`}>
+                         <p className={`mb-4 text-center text-sm ${message.startsWith('ERRO') ? 'text-red-400' : 'text-green-400'}`}>
                             {message}
                         </p>
                     )}
@@ -153,11 +191,10 @@ const LoginPage = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            // Usando gradiente original
                             className={`w-full py-3 rounded-lg font-bold text-lg shadow-xl transition-all duration-300 ${
                                 loading
-                                ? 'bg-gray-600 cursor-not-allowed text-gray-400' 
-                                : `${highlightGradient} hover:opacity-90 text-white` // Cor original text-white
+                                ? 'bg-gray-600 cursor-not-allowed text-gray-400'
+                                : `${highlightGradient} hover:opacity-90 text-white`
                             }`}
                         >
                             {loading ? 'Processando...' : (isLogin ? 'Entrar' : 'Cadastrar')}
@@ -172,9 +209,13 @@ const LoginPage = () => {
                         onClick={() => {
                             setIsLogin(!isLogin);
                             setMessage('');
-                            setFullName(''); 
+                            // Limpa campos ao alternar
+                            setFullName('');
+                            // setEmail(''); // Decide se quer limpar o email ou não
+                            setPassword('');
+                            setShowPassword(false); // Reseta visibilidade da senha
+                            // setRememberMe(false); // Já é feito no useEffect
                         }}
-                        // Cor original cyan
                         className="text-cyan-400 hover:text-cyan-300 font-bold transition-colors"
                     >
                         {isLogin ? 'Crie uma agora' : 'Faça login'}
