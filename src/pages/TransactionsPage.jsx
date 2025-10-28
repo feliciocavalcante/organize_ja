@@ -154,11 +154,11 @@ function TransactionsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label htmlFor="filtroTexto" className="block text-sm font-medium text-gray-300 mb-1">Buscar por Título</label>
-                        <input type="text" id="filtroTexto" value={filtroTexto} onChange={(e) => setFiltroTexto(e.target.value)} placeholder="Ex: Supermercado" className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-cyan-500 focus:border-cyan-500" />
+                        <input type="text" id="filtroTexto" value={filtroTexto} onChange={(e) => setFiltroTexto(e.target.value)} placeholder="Ex: Supermercado" className="px-4 py-2 w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-cyan-500 focus:border-cyan-500" />
                     </div>
                     <div>
                         <label htmlFor="filtroTipo" className="block text-sm font-medium text-gray-300 mb-1">Filtrar por Tipo</label>
-                        <select id="filtroTipo" value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)} className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-cyan-500 focus:border-cyan-500">
+                        <select id="filtroTipo" value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)} className=" px-4 py-2 w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-cyan-500 focus:border-cyan-500">
                             <option value="">Todos</option>
                             <option value="entrada">Entradas</option>
                             <option value="saida">Saídas</option>
@@ -167,8 +167,6 @@ function TransactionsPage() {
                 </div>
             </div>
 
-            {/* --- Tabela --- */}
-            {/* Passa as transações JÁ FILTRADAS */}
             <TransactionTable
                 transactions={filteredTransactions}
                 loading={loading} // Usa loading do contexto

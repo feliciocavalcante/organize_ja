@@ -76,6 +76,8 @@ function CheckoutPage() {
             // MUDANÇA AQUI
             // Removemos o setTimeout para a resposta ser imediata
             toast.success('Pagamento aprovado! Bem-vindo(a) ao Plano PRO!');
+
+            
             navigate('/dashboard'); 
         }
     };

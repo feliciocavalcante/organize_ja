@@ -1,4 +1,3 @@
-// src/components/Charts/MonthlyBarChart.jsx
 
 import React, { useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
@@ -12,7 +11,6 @@ import {
   Legend,
 } from 'chart.js';
 
-// Precisamos registrar todos os "módulos" que um gráfico de barras usa
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -26,30 +24,22 @@ function MonthlyBarChart({ transactions }) {
 
   const chartData = useMemo(() => {
     
-    // 1. Objeto para agrupar totais por mês (ex: "2025-10")
     const monthlyTotals = {};
 
     transactions.forEach(tx => {
-      // Pega a data e formata para "YYYY-MM" (ex: "2025-09")
-      // Adicionamos 'timeZone: UTC' para evitar problemas de fuso
       const date = new Date(tx.data);
       const monthKey = date.toLocaleDateString('sv-SE', { year: 'numeric', month: '2-digit', timeZone: 'UTC' }); // 'sv-SE' dá o formato YYYY-MM
       
-      // Se o mês ainda não existe no objeto, inicializa
       if (!monthlyTotals[monthKey]) {
         monthlyTotals[monthKey] = { entrada: 0, saida: 0 };
       }
 
-      // Soma o valor no tipo correto (entrada ou saida)
       monthlyTotals[monthKey][tx.tipo] += tx.valor;
     });
 
-    // 2. Ordenar os meses
     const sortedMonths = Object.keys(monthlyTotals).sort();
 
-    // 3. Criar os arrays de dados para o gráfico
     const labels = sortedMonths.map(monthKey => {
-      // Formata "2025-10" para "Out/2025" para ficar bonito no gráfico
       const [year, month] = monthKey.split('-');
       const date = new Date(year, month - 1);
       return date.toLocaleString('pt-BR', { month: 'short', year: 'numeric', timeZone: 'UTC' });
@@ -64,41 +54,40 @@ function MonthlyBarChart({ transactions }) {
         {
           label: 'Entradas',
           data: incomeData,
-          backgroundColor: 'rgba(74, 222, 128, 0.7)', // Verde (do seu logo)
+          backgroundColor: 'rgba(74, 222, 128, 0.7)', 
           borderColor: 'rgba(74, 222, 128, 1)',
           borderWidth: 1,
         },
         {
           label: 'Saídas',
           data: expenseData,
-          backgroundColor: 'rgba(248, 113, 113, 0.7)', // Vermelho
+          backgroundColor: 'rgba(248, 113, 113, 0.7)', 
           borderColor: 'rgba(248, 113, 113, 1)',
           borderWidth: 1,
         },
       ],
     };
 
-  }, [transactions]); // Só recalcula se as transações mudarem
+  }, [transactions]); 
 
-  // Opções para deixar o gráfico bonito no tema escuro
   const options = {
     responsive: true,
     plugins: {
       legend: {
         position: 'top',
         labels: {
-          color: '#e5e7eb', // Texto da legenda (cinza claro)
+          color: '#e5e7eb', 
           font: { size: 14 }
         }
       },
     },
     scales: {
-      y: { // Eixo Y (Valores)
-        ticks: { color: '#9ca3af', beginAtZero: true }, // Cor dos números
-        grid: { color: '#374151' } // Cor das linhas de fundo
+      y: { 
+        ticks: { color: '#9ca3af', beginAtZero: true }, 
+        grid: { color: '#374151' } 
       },
-      x: { // Eixo X (Meses)
-        ticks: { color: '#9ca3af' }, // Cor dos meses
+      x: { 
+        ticks: { color: '#9ca3af' }, 
         grid: { color: '#374151' }
       }
     }

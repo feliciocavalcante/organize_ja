@@ -1,4 +1,3 @@
-// src/pages/DashboardPage.jsx
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,9 +7,8 @@ import TransactionModal from '/src/pages/TransactionModal.jsx';
 import CategoryPieChart from '../dashboardComponents/Charts/CategoryPieChart';
 import UpgradeModal from '../planoModal/UpgradeModal.jsx';
 import toast from 'react-hot-toast';
-import { useTransactions } from '../context/TransactionContext'; // 1. IMPORTAR O HOOK DO CONTEXTO
+import { useTransactions } from '../context/TransactionContext'; 
 
-// ... (Componente MetricCard - Sem alterações) ...
 const MetricCard = ({ title, value, icon: Icon, color, isTotal = false, totalValue = 0 }) => {
     let bgColor = 'bg-white';
     if (isTotal) {
