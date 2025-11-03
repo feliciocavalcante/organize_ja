@@ -17,24 +17,19 @@ function Header({ setIsMobileMenuOpen }) {
         navigate('/auth');
         return;
       }
-      setFullName(user.email); // Define o email como fallback (plano B)
+      setFullName(user.email); 
 
-      // --- INÍCIO DA CORREÇÃO ---
-      // Trocamos .single() por uma busca de lista, que não quebra.
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select('full_name')
-        .eq('id', user.id); // Busca uma LISTA
+        .eq('id', user.id);
 
-      // Verificamos se a lista veio e se tem pelo menos 1 item
       if (!error && profiles && profiles.length > 0) {
-        const profile = profiles[0]; // Pegamos o primeiro item
+        const profile = profiles[0]; 
         if (profile.full_name) {
-          setFullName(profile.full_name); // Atualiza o nome
+          setFullName(profile.full_name); 
         }
       }
-      // Se 'profiles' estiver vazio, o app não quebra e só mostra o email.
-      // --- FIM DA CORREÇÃO ---
 
       setLoading(false);
     };
@@ -53,9 +48,7 @@ function Header({ setIsMobileMenuOpen }) {
                        h-20 flex items-center justify-between 
                        bg-gray-900 
                        border-b border-gray-700 
-                       px-4 md:px-8"
-    >
-      {/* Lado Esquerdo: Ícone de Hamburger */}
+                       px-4 md:px-8">
       <div className="flex items-center">
         <button
           onClick={() => setIsMobileMenuOpen(prev => !prev)}
@@ -66,7 +59,6 @@ function Header({ setIsMobileMenuOpen }) {
         </button>
       </div>
 
-      {/* Lado Direito: "Olá" e "Sair" */}
       <div className="flex items-center gap-6">
         {loading ? (
           <span className="text-sm text-gray-400">Carregando...</span>

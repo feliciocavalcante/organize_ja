@@ -1,16 +1,16 @@
-// src/main.jsx
+
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 
-// Importe as páginas
+
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import HomePage from './pages/HomePage';
 
-// Importe os NOVOS componentes de layout
+
 import AppLayout from './pages/AppLayout';
 import ReportsPage from './pages/ReportsPage';
 import TransactionsPage from './pages/TransactionsPage';

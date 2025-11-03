@@ -1,18 +1,18 @@
 // src/pages/TransactionsPage.jsx
 
-import React, { useState, useEffect, useMemo } from 'react'; // useMemo é importante aqui
+import React, { useState, useEffect, useMemo } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import TransactionModal from '/src/pages/TransactionModal.jsx';
 import toast from 'react-hot-toast';
-import { useTransactions } from '../context/TransactionContext'; // 1. IMPORTAR O HOOK
+import { useTransactions } from '../context/TransactionContext';
 
-// ... (Componente TransactionTable - Sem alterações) ...
+
 const TransactionTable = ({ transactions, loading, error, onEditClick, onDeleteClick }) => {
-    // Adiciona verificação se loading é true
+
     if (loading) return <div className="text-gray-400 text-center p-6">Carregando transações...</div>;
     if (error) return <div className="text-red-400 text-center p-6">Erro ao buscar transações: {error}</div>;
-    // Garante que transactions é um array
+
     if (!Array.isArray(transactions) || transactions.length === 0) return <div className="text-gray-500 text-center p-6">Nenhuma transação encontrada para este filtro.</div>;
     return (
         <div className="bg-gray-800 rounded-lg shadow-xl p-4 mt-6">
@@ -44,73 +44,61 @@ const TransactionTable = ({ transactions, loading, error, onEditClick, onDeleteC
     );
 };
 
-// --- Página Principal de Transações ---
+
 function TransactionsPage() {
-    // REMOVIDO: States locais de user, transactions, loading, error
-    // const [user, setUser] = useState(null);
-    // const [transactions, setTransactions] = useState([]);
-    // const [loading, setLoading] = useState(true);
-    // const [error, setError] = useState(null);
+    
     const navigate = useNavigate();
 
-    // States dos Filtros (Continuam)
+  
     const [filtroTexto, setFiltroTexto] = useState('');
     const [filtroTipo, setFiltroTipo] = useState('');
 
-    // States do Modal (Continuam)
+    
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState(null);
 
-    // 2. USAR O HOOK DO CONTEXTO
+   
     const {
-        transactions: allTransactions, // Renomeado para não conflitar
+        transactions: allTransactions, 
         loading,
         error,
         user,
         refetchTransactions
     } = useTransactions();
 
-    // REMOVIDO: useEffect fetchUser
-    // useEffect(() => { /* ... */ }, [navigate]);
-
-    // REMOVIDO: fetchTransactions local
-    // const fetchTransactions = async (userId, texto, tipo) => { /* ... */ };
-
-    // REMOVIDO: useEffect que chamava fetchTransactions local
-    // useEffect(() => { /* ... */ }, [user, filtroTexto, filtroTipo]);
+   
 
 
-    // 3. FILTRAGEM CLIENT-SIDE com useMemo
+
     const filteredTransactions = useMemo(() => {
-        // Se não houver transações do contexto, retorna array vazio
+  
         if (!Array.isArray(allTransactions)) return [];
 
         return allTransactions.filter(tx => {
             const textoMatch = filtroTexto
                 ? tx.descricao.toLowerCase().includes(filtroTexto.toLowerCase())
-                : true; // Se filtroTexto for vazio, passa tudo
+                : true; 
 
             const tipoMatch = filtroTipo
                 ? tx.tipo === filtroTipo
-                : true; // Se filtroTipo for vazio, passa tudo
+                : true; 
 
             return textoMatch && tipoMatch;
         });
-        // Recalcula APENAS se as transações do contexto ou os filtros mudarem
+       
     }, [allTransactions, filtroTexto, filtroTipo]);
 
 
-    // ... (handleEditClick - Sem alterações) ...
     const handleEditClick = (transaction) => {
         setEditingTransaction(transaction);
         setIsModalOpen(true);
     };
 
-    // 4. ATUALIZAR handleDeleteClick para usar refetch
+
     const handleDeleteClick = async (transaction) => {
         if (!user) return;
         if (window.confirm(`Tem certeza que deseja excluir: "${transaction.descricao}"?`)) {
-            const { error: deleteError } = await supabase // Renomeado para evitar conflito com 'error' do contexto
+            const { error: deleteError } = await supabase 
                 .from('transacoes')
                 .delete()
                 .eq('id', transaction.id);
@@ -119,21 +107,20 @@ function TransactionsPage() {
                 toast.error(`Erro ao deletar: ${deleteError.message}`);
             } else {
                 toast.success('Transação deletada!');
-                refetchTransactions(); // Chama a função do contexto
+                refetchTransactions(); 
             }
         }
     };
 
-    // 5. ATUALIZAR handleModalClose para usar refetch (embora o modal já use)
+
     const handleModalClose = () => {
         setIsModalOpen(false);
         setEditingTransaction(null);
-        // Opcional: Chamar refetch aqui garante recarga mesmo se o modal falhar
-        // refetchTransactions();
+       
     };
 
 
-    // ADICIONADO: useEffect para segurança (redirecionar se não houver user)
+
     useEffect(() => {
         const timer = setTimeout(() => {
             if (!user && !loading) {
@@ -144,12 +131,10 @@ function TransactionsPage() {
     }, [user, loading, navigate]);
 
 
-    // 6. JSX USA OS DADOS FILTRADOS E O ESTADO DO CONTEXTO
     return (
         <div className="p-8">
             <h1 className="text-3xl font-bold text-white mb-6">Minhas Transações</h1>
 
-            {/* --- Filtros (Sem alterações na estrutura) --- */}
             <div className="bg-gray-800 p-4 rounded-lg shadow-lg mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -169,18 +154,16 @@ function TransactionsPage() {
 
             <TransactionTable
                 transactions={filteredTransactions}
-                loading={loading} // Usa loading do contexto
-                error={error}     // Usa error do contexto
+                loading={loading} 
+                error={error}    
                 onEditClick={handleEditClick}
                 onDeleteClick={handleDeleteClick}
             />
 
-            {/* --- Modal --- */}
-            {/* Modal agora chama refetchTransactions do contexto ao salvar */}
             <TransactionModal
                 isOpen={isModalOpen}
                 onClose={handleModalClose}
-                onTransactionSaved={refetchTransactions} // Chama refetch do contexto
+                onTransactionSaved={refetchTransactions} 
                 transactionToEdit={editingTransaction}
             />
         </div>

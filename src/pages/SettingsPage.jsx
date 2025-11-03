@@ -1,4 +1,4 @@
-// src/pages/SettingsPage.jsx
+
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -6,7 +6,7 @@ import { supabase } from '../supabaseClient';
 import toast from 'react-hot-toast';
 
 function SettingsPage() {
-    // --- States de Autenticação, Perfil, Senha (Mantidos) ---
+ 
     const [user, setUser] = useState(null);
     const [loadingUser, setLoadingUser] = useState(true);
     const navigate = useNavigate();
@@ -17,43 +17,42 @@ function SettingsPage() {
     const [passwordLoading, setPasswordLoading] = useState(false);
     const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
 
-    // --- ADICIONADO: States para WhatsApp ---
     const [phoneNumber, setPhoneNumber] = useState('');
     const [isWhatsAppLinked, setIsWhatsAppLinked] = useState(false);
     const [whatsAppLoading, setWhatsAppLoading] = useState(false);
     const [whatsAppCheckLoading, setWhatsAppCheckLoading] = useState(true);
 
-    // MODIFICADO: Busca usuário e perfil (incluindo phone_number)
+ 
     useEffect(() => {
         const fetchUserAndProfile = async () => {
             setLoadingUser(true);
-            setWhatsAppCheckLoading(true); // Inicia loading do WhatsApp check
+            setWhatsAppCheckLoading(true);
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) { navigate('/auth'); return; }
             setUser(user);
 
-            // Busca full_name e phone_number
+       
             const { data: profile, error } = await supabase
                 .from('profiles')
-                .select('full_name, phone_number') // Pega o número de telefone
+                .select('full_name, phone_number') 
                 .eq('id', user.id)
                 .single();
 
             if (profile) {
                 setFullName(profile.full_name || '');
-                // ADICIONADO: Preenche state do WhatsApp
+           
                 setPhoneNumber(profile.phone_number || '');
                 setIsWhatsAppLinked(!!profile.phone_number);
             } else if (error && error.code !== 'PGRST116') {
                 console.error("Erro ao buscar perfil:", error);
             }
-            setWhatsAppCheckLoading(false); // Termina loading do WhatsApp check
+            setWhatsAppCheckLoading(false); 
             setLoadingUser(false);
         };
         fetchUserAndProfile();
     }, [navigate]);
 
-    // Atualiza Nome (sem alterações)
+   
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
         setProfileLoading(true);
@@ -64,7 +63,7 @@ function SettingsPage() {
         setProfileLoading(false);
     };
 
-    // Altera Senha (sem alterações)
+
     const handleChangePassword = async (e) => {
         e.preventDefault();
         if (newPassword.length < 6) { setPasswordMessage({ type: 'error', text: 'Senha curta (min 6).' }); return; }
@@ -76,7 +75,6 @@ function SettingsPage() {
         setPasswordLoading(false);
     };
 
-    // --- ADICIONADO: Funções para Vincular/Desvincular WhatsApp ---
     const handleLinkWhatsApp = async (e) => {
         e.preventDefault();
         if (!phoneNumber.trim() || !user) { toast.error('Insira nº WhatsApp (55XX9...).'); return; }
@@ -108,10 +106,9 @@ function SettingsPage() {
     return (
         <div className="p-8">
             <h1 className="text-center text-3xl font-bold text-white mb-8">Configurações da Conta</h1>
-            {/* MODIFICADO: Grid ajustado para potencialmente 3 colunas */}
+
             <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-                {/* --- Card 1: Perfil (Ocupa 1 coluna) --- */}
                 <div className="bg-gray-800 p-6 rounded-lg shadow-xl lg:col-span-1">
                      <h2 className="text-xl font-semibold text-white mb-4">Meu Perfil</h2>
                      <form onSubmit={handleUpdateProfile}>
@@ -121,7 +118,7 @@ function SettingsPage() {
                      </form>
                 </div>
 
-                {/* --- Card 2: Senha (Ocupa 1 coluna) --- */}
+              
                 <div className="bg-gray-800 p-6 rounded-lg shadow-xl lg:col-span-1">
                      <h2 className="text-xl font-semibold text-white mb-4">Alterar Senha</h2>
                      <form onSubmit={handleChangePassword}>
@@ -131,14 +128,14 @@ function SettingsPage() {
                      </form>
                 </div>
 
-                {/* --- ADICIONADO: Card 3 Vincular WhatsApp (Ocupa 1 coluna) --- */}
+              
                 <div className="bg-gray-800 p-6 rounded-lg shadow-xl lg:col-span-1">
                     <h2 className="text-xl font-semibold text-white mb-4">Vincular WhatsApp</h2>
 
                     {whatsAppCheckLoading ? (
                         <p className="text-gray-400">Verificando...</p>
                     ) : isWhatsAppLinked ? (
-                        // Se JÁ estiver vinculado
+                       
                         <div className="text-center">
                             <div className="bg-green-900/50 border border-green-700 p-4 rounded-md mb-4">
                                 <p className="font-semibold text-green-300">✅ WhatsApp Vinculado!</p>
@@ -154,7 +151,7 @@ function SettingsPage() {
                             </button>
                         </div>
                     ) : (
-                        // Se NÃO estiver vinculado (Formulário)
+                        
                         <>
                             <p className="text-gray-300 mb-4 text-sm">
                                 Vincule seu nº WhatsApp (<code>55XX9...</code>) para add transações.

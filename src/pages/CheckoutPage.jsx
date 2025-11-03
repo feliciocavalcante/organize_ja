@@ -4,22 +4,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { CreditCard, User, Home, Lock } from 'lucide-react';
-import toast from 'react-hot-toast'; // 1. IMPORTAR O TOAST
+import toast from 'react-hot-toast';
 
 function CheckoutPage() {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
-    // const [error, setError] = useState(''); // 2. REMOVIDO (toast vai cuidar disso)
-    
-    // --- States do Formulário ---
+
+
+
     const [fullName, setFullName] = useState('');
     const [address, setAddress] = useState('');
     const [cardNumber, setCardNumber] = useState('');
     const [cardExpiry, setCardExpiry] = useState('');
     const [cardCVC, setCardCVC] = useState('');
 
-    // ... (useEffect fetchUserData - Sem alterações) ...
+
     useEffect(() => {
         const fetchUserData = async () => {
             setLoading(true);
@@ -34,7 +34,7 @@ function CheckoutPage() {
                 .from('profiles')
                 .select('full_name')
                 .eq('id', user.id);
-            
+
             if (!error && profiles && profiles.length > 0) {
                 setFullName(profiles[0].full_name || '');
             }
@@ -43,21 +43,19 @@ function CheckoutPage() {
         fetchUserData();
     }, [navigate]);
 
-    // 3. ATUALIZAR A FUNÇÃO DE PAGAMENTO
+
     const handleSubmitPayment = async (e) => {
         e.preventDefault();
-        
-        // Validação
+
+
         if (cardNumber.length < 16 || cardExpiry.length < 4 || cardCVC.length < 3) {
-            // MUDANÇA AQUI
+
             toast.error('Dados do cartão inválidos. Por favor, preencha corretamente.');
             return;
         }
-        
-        setLoading(true);
-        // setError(''); // REMOVIDO
 
-        // Atualiza o perfil (Upsert)
+        setLoading(true);
+
         const { error: updateError } = await supabase
             .from('profiles')
             .upsert({
@@ -69,16 +67,14 @@ function CheckoutPage() {
             .eq('id', user.id);
 
         if (updateError) {
-            // MUDANÇA AQUI
+
             toast.error(updateError.message);
             setLoading(false);
         } else {
-            // MUDANÇA AQUI
-            // Removemos o setTimeout para a resposta ser imediata
-            toast.success('Pagamento aprovado! Bem-vindo(a) ao Plano PRO!');
 
-            
-            navigate('/dashboard'); 
+
+            toast.success('Pagamento aprovado! Bem-vindo(a) ao Plano PRO!');
+            navigate('/dashboard');
         }
     };
 
@@ -91,10 +87,10 @@ function CheckoutPage() {
             <div className="max-w-2xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl border border-gray-700">
                 <form onSubmit={handleSubmitPayment}>
                     <div className="space-y-6">
-                        
-                        {/* --- Seção 1: Dados Pessoais (Sem alterações) --- */}
+
+
                         <h2 className="text-xl font-semibold text-white border-b border-gray-700 pb-2 flex items-center">
-                            <User className="w-5 h-5 mr-3 text-lime-400"/>
+                            <User className="w-5 h-5 mr-3 text-lime-400" />
                             Seus Dados
                         </h2>
                         <div>
@@ -125,9 +121,9 @@ function CheckoutPage() {
                             />
                         </div>
 
-                        {/* --- Seção 2: Dados do Cartão (Sem alterações) --- */}
+
                         <h2 className="text-xl font-semibold text-white border-b border-gray-700 pb-2 flex items-center">
-                            <CreditCard className="w-5 h-5 mr-3 text-lime-400"/>
+                            <CreditCard className="w-5 h-5 mr-3 text-lime-400" />
                             Dados de Pagamento (Simulado)
                         </h2>
                         <div>
@@ -178,11 +174,11 @@ function CheckoutPage() {
                             </div>
                         </div>
 
-                        {/* --- Botão de Pagar (Sem alterações) --- */}
+
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex justify-center items-center bg-lime-500 hover:bg-lime-400 text-gray-900 font-bold py-3 px-6 rounded-lg text-lg transition-colors disabled:opacity-50"
+                            className="w-full cursor-pointer flex justify-center items-center bg-lime-500 hover:bg-lime-400 text-gray-900 font-bold py-3 px-6 rounded-lg text-lg transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Processando...' : (
                                 <>

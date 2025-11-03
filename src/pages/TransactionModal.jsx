@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, DollarSign, Tag, Calendar, ChevronDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { supabase } from '../supabaseClient'; // Importa o cliente Supabase
+import { supabase } from '../supabaseClient'; 
 
-// Opções de Categorias para o Select
+
 const CATEGORY_OPTIONS = [
     'Salário', 'Investimento', 'Outras Receitas',
     'Alimentação', 'Moradia', 'Transporte', 'Lazer', 'Contas', 'Outras Despesas'
@@ -12,24 +12,24 @@ const TransactionModal = ({ isOpen, onClose, onTransactionSaved, transactionToEd
     // 1. Estados do Formulário
     const [descricao, setDescricao] = useState('');
     const [valor, setValor] = useState('');
-    const [tipo, setTipo] = useState('entrada'); // 'entrada' ou 'saida'
+    const [tipo, setTipo] = useState('entrada'); 
     const [categoria, setCategoria] = useState(CATEGORY_OPTIONS[0]);
-    const [data, setData] = useState(new Date().toISOString().split('T')[0]); // Data de hoje
+    const [data, setData] = useState(new Date().toISOString().split('T')[0]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const isEditMode = Boolean(transactionToEdit);
 
     useEffect(() => {
-        if (isOpen) { // Só roda quando o modal abre
+        if (isOpen) { 
             if (isEditMode) {
-                // Modo Edição: Preenche o formulário
+                
                 setDescricao(transactionToEdit.descricao);
-                setValor(transactionToEdit.valor.toString()); // Valor precisa ser string para o input
+                setValor(transactionToEdit.valor.toString()); 
                 setTipo(transactionToEdit.tipo);
                 setCategoria(transactionToEdit.categoria);
-                setData(transactionToEdit.data); // O input 'date' aceita o formato 'YYYY-MM-DD'
+                setData(transactionToEdit.data); 
             } else {
-                // Modo Criação: Limpa o formulário (define padrões)
+ 
                 setDescricao('');
                 setValor('');
                 setTipo('entrada');
@@ -47,7 +47,6 @@ const TransactionModal = ({ isOpen, onClose, onTransactionSaved, transactionToEd
         setLoading(true);
         setError(null);
 
-        // ... (A validação do usuário e do valor continua igual)
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
             setError('Você precisa estar logado.');
@@ -62,7 +61,6 @@ const TransactionModal = ({ isOpen, onClose, onTransactionSaved, transactionToEd
             return;
         }
 
-        // 1. Monta o objeto da transação
         const transactionData = {
             user_id: user.id,
             descricao: descricao,
@@ -72,54 +70,50 @@ const TransactionModal = ({ isOpen, onClose, onTransactionSaved, transactionToEd
             data: data,
         };
 
-        // 📍 INÍCIO DA LÓGICA DE UPDATE / INSERT
+      
         let error = null;
 
         if (isEditMode) {
-            // MODO EDIÇÃO: Faz um UPDATE
+         
             const { error: updateError } = await supabase
                 .from('transacoes')
-                .update(transactionData) // O objeto com os novos dados
-                .eq('id', transactionToEdit.id); // Onde o ID bate
+                .update(transactionData)
+                .eq('id', transactionToEdit.id); 
             error = updateError;
 
         } else {
-            // MODO CRIAÇÃO: Faz um INSERT
+       
             const { error: insertError } = await supabase
                 .from('transacoes')
-                .insert([transactionData]); // Envia o objeto
+                .insert([transactionData]); 
             error = insertError;
         }
-        // 📍 FIM DA LÓGICA
+      
 
         if (error) {
             console.error('Erro ao salvar transação:', error);
             setError(`Erro ao salvar: ${error.message}`);
         } else {
-            // Sucesso!
+       
             alert(isEditMode ? 'Transação atualizada!' : 'Transação salva!');
 
-            // (Não precisamos mais limpar o form aqui, o 'useEffect' já faz isso)
-
-            onTransactionSaved(); // Recarrega os dados no Dashboard
-            onClose(); // Fecha o modal
+            onTransactionSaved(); 
+            onClose(); 
         }
 
         setLoading(false);
     };
 
-    // Estilos Tailwind para o botão de tipo (Entrada/Saída)
+    
     const activeClass = 'ring-2 ring-cyan-500 bg-cyan-700 text-white';
     const inactiveClass = 'bg-gray-800 text-gray-400 hover:bg-gray-700';
 
     return (
-        // Overlay do Modal
+
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
 
-            {/* Conteúdo do Modal */}
             <div className="bg-gray-900 w-full max-w-md p-6 rounded-xl shadow-2xl border border-gray-800 relative">
 
-                {/* Cabeçalho do Modal (VOCÊ FEZ CERTO) */}
                 <h2 className="text-2xl font-bold text-white mb-4 border-b border-gray-700 pb-3">
                     {isEditMode ? 'Editar Transação' : 'Nova Transação'}
                 </h2>
@@ -132,7 +126,7 @@ const TransactionModal = ({ isOpen, onClose, onTransactionSaved, transactionToEd
 
                 <form onSubmit={handleSubmit} className="space-y-4">
 
-                    {/* Botões de Tipo (Entrada / Saída) */}
+        
                     <div className="flex justify-center space-x-4 mb-6">
                         <button
                             type="button"
@@ -154,14 +148,14 @@ const TransactionModal = ({ isOpen, onClose, onTransactionSaved, transactionToEd
                         </button>
                     </div>
 
-                    {/* Campo Valor */}
+       
                     <div>
                         <label className="text-gray-400 text-sm flex items-center mb-1">
                             <DollarSign className="w-4 h-4 mr-2" /> Valor
                         </label>
                         <input
                             type="number"
-                            step="0.01" // Permite duas casas decimais
+                            step="0.01" 
                             value={valor}
                             onChange={(e) => setValor(e.target.value)}
                             required
@@ -170,7 +164,7 @@ const TransactionModal = ({ isOpen, onClose, onTransactionSaved, transactionToEd
                         />
                     </div>
 
-                    {/* Campo Descrição */}
+           
                     <div>
                         <label className="text-gray-400 text-sm flex items-center mb-1">
                             Descrição
@@ -185,9 +179,9 @@ const TransactionModal = ({ isOpen, onClose, onTransactionSaved, transactionToEd
                         />
                     </div>
 
-                    {/* Categoria e Data (Lado a Lado) */}
+             
                     <div className="flex space-x-4">
-                        {/* Campo Categoria */}
+              
                         <div className="w-1/2">
                             <label className="text-gray-400 text-sm flex items-center mb-1">
                                 <Tag className="w-4 h-4 mr-2" /> Categoria
@@ -207,7 +201,7 @@ const TransactionModal = ({ isOpen, onClose, onTransactionSaved, transactionToEd
                             </div>
                         </div>
 
-                        {/* Campo Data */}
+              
                         <div className="w-1/2">
                             <label className="text-gray-400 text-sm flex items-center mb-1">
                                 <Calendar className="w-4 h-4 mr-2" /> Data
@@ -222,7 +216,7 @@ const TransactionModal = ({ isOpen, onClose, onTransactionSaved, transactionToEd
                         </div>
                     </div>
 
-                    {/* Botão de Submissão */}
+   
                     <button
                         type="submit"
                         disabled={loading}
@@ -231,7 +225,7 @@ const TransactionModal = ({ isOpen, onClose, onTransactionSaved, transactionToEd
                             : 'bg-cyan-600 hover:bg-cyan-700 text-white'
                             }`}
                     >
-                        {/* 📍 A CORREÇÃO ESTÁ AQUI: */}
+             
                         {loading ? 'Salvando...' : (isEditMode ? 'Atualizar Transação' : 'Salvar Transação')}
                     </button>
                 </form>
