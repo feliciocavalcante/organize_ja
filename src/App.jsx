@@ -1,4 +1,4 @@
-// src/App.jsx
+
 import logo1 from './assets/logo1.png';
 import Header from './components/header/Header';
 import About from './components/about/About';
@@ -27,9 +27,11 @@ function App() {
             </a>
           </div>
         </div>
+        
       </nav>
 
       <Header />
+      
 
       <About />
 
