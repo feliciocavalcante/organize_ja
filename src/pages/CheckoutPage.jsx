@@ -103,7 +103,7 @@ function CheckoutPage() {
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                                 required
-                                className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                                className="p-2 w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-lime-500 focus:border-lime-500"
                             />
                         </div>
                         <div>
@@ -117,7 +117,7 @@ function CheckoutPage() {
                                 onChange={(e) => setAddress(e.target.value)}
                                 placeholder="Ex: Rua Fictícia, 123 - Bairro"
                                 required
-                                className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                                className="p-2 w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-lime-500 focus:border-lime-500"
                             />
                         </div>
 
@@ -138,7 +138,7 @@ function CheckoutPage() {
                                 placeholder="0000 0000 0000 0000"
                                 maxLength={16}
                                 required
-                                className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                                className="p-2 w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-lime-500 focus:border-lime-500"
                             />
                         </div>
                         <div className="flex gap-4">
@@ -154,7 +154,7 @@ function CheckoutPage() {
                                     placeholder="MM/AA"
                                     maxLength={4}
                                     required
-                                    className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                                    className="p-2 w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-lime-500 focus:border-lime-500"
                                 />
                             </div>
                             <div className="w-1/2">
@@ -169,7 +169,7 @@ function CheckoutPage() {
                                     placeholder="123"
                                     maxLength={3}
                                     required
-                                    className="w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                                    className="p-2 w-full bg-gray-700 border-gray-600 rounded-md text-white shadow-sm focus:ring-lime-500 focus:border-lime-500"
                                 />
                             </div>
                         </div>
