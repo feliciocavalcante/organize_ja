@@ -83,6 +83,7 @@ export default function About() {
                 <strong>Confirmação Imediata:</strong> Receba a confirmação na hora.
               </li>
             </ul>
+            
             <a
               href="#cadastro"
               className="mt-12  inline-flex items-center text-xl font-bold rounded-full px-8 py-3 transition-all duration-300 transform hover:scale-105 shadow-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-white">
